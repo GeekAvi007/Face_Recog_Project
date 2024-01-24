@@ -1,18 +1,29 @@
-from pyfirmata import Arduino, SERVO
+import RPi.GPIO as GPIO
+import time
 
-PORT="COM7"
+servo_pin = 18
+frequency = 50
 
-pin=10
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(servo_pin, GPIO.OUT)
 
-board=Arduino(PORT)
+pwm = GPIO.PWM(servo_pin, frequency)
 
-board.digital[pin].mode=SERVO
+def rotate_servo(angle):
+    duty_cycle = 2.5 + (angle / 18.0)
+    pwm.ChangeDutyCycle(duty_cycle)
+    time.sleep(1)
 
-def rotateServo(pin, angle):
-    board.digital[pin].write(angle)
+pwm.start(0)
 
-def doorAutomate(val):
-    if val==0:
-        rotateServo(pin, 220)
-    elif val==1:
-        rotateServo(pin, 40)
+def door_automate(val):
+    if val == 0:
+        rotate_servo(90)
+    elif val == 1:
+        rotate_servo(0)
+
+door_automate(0)
+door_automate(1)
+
+pwm.stop()
+GPIO.cleanup()
